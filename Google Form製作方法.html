@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Forms 互動教學指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Soft Neutral Blue (bg-gray-50, text-gray-800, blue-600 accent) -->
+    <!-- Application Structure Plan: A tabbed SPA. A persistent sidebar navigation allows users to jump to thematic sections (Intro, Setup, Questions, Advanced, Share/Analyze, Summary) instead of a linear slide-by-slide flow. This converts the PPT outline into an interactive reference guide, improving usability and non-linear exploration of the tutorial content. -->
+    <!-- Visualization & Content Choices: Report Info: Question Types (Slides 5-6) -> Goal: Organize/Inform -> Viz: Interactive HTML/CSS Cards Grid -> Interaction: Click card to show details (in-page expansion) -> Justification: More engaging than static tables. Report Info: Analysis (Slide 11) -> Goal: Inform -> Viz: Static HTML/CSS mockup of Google's 'Summary' charts -> Interaction: None -> Justification: Visually demonstrates the concept of 'summary charts' without needing Chart.js or real data. Report Info: Step-by-step processes (Slides 3, 10) -> Goal: Inform -> Viz: Styled HTML ordered lists -> Interaction: None -> Justification: Clearly shows sequential steps. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Inter', sans-serif;
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+        }
+        .nav-button.active {
+            background-color: #2563EB; /* blue-600 */
+            color: white;
+            transform: translateX(4px);
+        }
+        .nav-button:not(.active):hover {
+            background-color: #EFF6FF; /* blue-50 */
+            color: #1E40AF; /* blue-800 */
+        }
+        .question-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .question-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .fake-chart-bar {
+            background-color: #3B82F6; /* blue-500 */
+            width: 0%;
+            transition: width 1s ease-out;
+        }
+        .fake-chart-pie {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-image: conic-gradient(
+                #3B82F6 0% 40%, 
+                #10B981 40% 75%, 
+                #F59E0B 75% 100%
+            );
+        }
+        .chart-container { 
+            position: relative; 
+            width: 100%; 
+            max-width: 600px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 300px; 
+            max-height: 400px; 
+            padding: 1rem;
+            border: 1px solid #E5E7EB; /* gray-200 */
+            border-radius: 0.5rem;
+            background-color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container max-w-7xl mx-auto p-4 sm:p-6 md:p-8">
+        
+        <header class="mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-800">輕鬆上手！Google Forms 問卷製作指南</h1>
+            <p class="text-lg text-gray-600 mt-2">一個互動式指南，帶您快速掌握免費、高效的數據收集工具。</p>
+        </header>
+
+        <div class="md:flex md:space-x-8">
+            
+            <!-- Sidebar Navigation -->
+            <nav class="md:w-1/4 mb-8 md:mb-0">
+                <ul class="sticky top-8 space-y-2">
+                    <li><button data-target="panel-intro" class="nav-button active w-full text-left px-4 py-3 rounded-lg font-medium">🚀 什麼是 Google Forms？</button></li>
+                    <li><button data-target="panel-setup" class="nav-button w-full text-left px-4 py-3 rounded-lg font-medium">🎨 基本設定與美化</button></li>
+                    <li><button data-target="panel-questions" class="nav-button w-full text-left px-4 py-3 rounded-lg font-medium">❓ 問題類型詳解</button></li>
+                    <li><button data-target="panel-advanced" class="nav-button w-full text-left px-4 py-3 rounded-lg font-medium">⚙️ 進階功能與設定</button></li>
+                    <li><button data-target="panel-analysis" class="nav-button w-full text-left px-4 py-3 rounded-lg font-medium">📊 分享與分析回應</button></li>
+                    <li><button data-target="panel-summary" class="nav-button w-full text-left px-4 py-3 rounded-lg font-medium">💡 總結與重點</button></li>
+                </ul>
+            </nav>
+
+            <!-- Content Panels -->
+            <main class="md:w-3/4 bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+                
+                <!-- Panel 1: Intro (Slides 2 & 3) -->
+                <section id="panel-intro" class="content-panel">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">什麼是 Google Forms？</h2>
+                    <p class="mb-6 text-gray-700">這是一個由 Google 提供的免費雲端工具，屬於 Google 文件套件的一部分。它讓您可以輕鬆建立問卷、測驗或報名表，並即時進行協作與編輯。</p>
+                    
+                    <div class="grid md:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                            <h3 class="font-semibold text-lg text-blue-800 mb-2">核心概念</h3>
+                            <ul class="list-disc list-inside space-y-1 text-gray-700">
+                                <li>基於雲端，即時協作</li>
+                                <li>完全免費（需 Google 帳戶）</li>
+                                <li>操作直覺，易於上手</li>
+                            </ul>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                            <h3 class="font-semibold text-lg text-green-800 mb-2">主要用途</h3>
+                            <ul class="list-disc list-inside space-y-1 text-gray-700">
+                                <li>市場調查、意見收集</li>
+                                <li>活動報名、測試或測驗</li>
+                                <li>數據收集與整理</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">如何開始建立問卷 (進入介面)</h2>
+                    <p class="mb-6 text-gray-700">您可以透過以下任一方式快速開始您的第一份問卷：</p>
+                    <ol class="list-decimal list-inside space-y-4">
+                        <li class="text-gray-700">
+                            <strong class="font-medium text-gray-900">方法 A (直接存取):</strong>
+                            <p class="pl-6">在您的瀏覽器網址列輸入 `forms.google.com` 並登入您的 Google 帳戶。</p>
+                        </li>
+                        <li class="text-gray-700">
+                            <strong class="font-medium text-gray-900">方法 B (透過雲端硬碟):</strong>
+                            <p class="pl-6">登入 Google 雲端硬碟 (Drive) > 點擊左上角「新增」> 選擇「Google 表單」。</p>
+                        </li>
+                        <li class="text-gray-700">
+                            <strong class="font-medium text-gray-900">選擇起始方式:</strong>
+                            <p class="pl-6">您可以選擇「空白表單」從零開始，或使用「範本庫」來加速設計。</p>
+                        </li>
+                    </ol>
+
+                    <!-- 新增的完整製作流程步驟 -->
+                    <div class="mt-10 pt-6 border-t border-gray-200">
+                        <h2 class="text-2xl font-bold text-blue-700 mb-4">問卷製作的五個核心步驟 (模擬截圖引導)</h2>
+                        <p class="mb-6 text-gray-700">從建立到發佈，掌握這 5 個關鍵步驟就能輕鬆完成一份專業問卷：</p>
+                        
+                        <div class="space-y-6">
+                            <div class="flex items-start p-4 bg-gray-50 rounded-lg shadow-md border-l-4 border-blue-500">
+                                <span class="text-2xl font-bold text-blue-600 mr-4">1.</span>
+                                <div>
+                                    <strong class="text-lg font-semibold text-gray-900">建立與命名</strong>
+                                    <p class="text-gray-700 mt-1">
+                                        點擊首頁的**「空白表單」**，進入編輯介面。
+                                        點擊左上角**「未命名表單」**來輸入您的問卷標題。
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start p-4 bg-gray-50 rounded-lg shadow-md border-l-4 border-green-500">
+                                <span class="text-2xl font-bold text-green-600 mr-4">2.</span>
+                                <div>
+                                    <strong class="text-lg font-semibold text-gray-900">新增與設定問題</strong>
+                                    <p class="text-gray-700 mt-1">
+                                        點擊右側工具列的**「+」圖示**來新增問題。
+                                        選擇正確的**問題類型**（例如：單選、核取）。
+                                        記得開啟問題下方的**「必填」**開關，確保資料完整。
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start p-4 bg-gray-50 rounded-lg shadow-md border-l-4 border-yellow-500">
+                                <span class="text-2xl font-bold text-yellow-600 mr-4">3.</span>
+                                <div>
+                                    <strong class="text-lg font-semibold text-gray-900">美化佈景主題</strong>
+                                    <p class="text-gray-700 mt-1">
+                                        點擊頂部選單的**「調色盤 🎨」圖示**，進入「自訂主題」。
+                                        您可以上傳**頁首圖片**、更改**主題顏色**或調整**字型樣式**。
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start p-4 bg-gray-50 rounded-lg shadow-md border-l-4 border-red-500">
+                                <span class="text-2xl font-bold text-red-600 mr-4">4.</span>
+                                <div>
+                                    <strong class="text-lg font-semibold text-gray-900">調整進階設定</strong>
+                                    <p class="text-gray-700 mt-1">
+                                        點擊頂部選單的**「⚙️ 設定」標籤**。
+                                        檢查「回覆」下的設定（例如：是否**限制只允許一次回應**）。
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start p-4 bg-gray-50 rounded-lg shadow-md border-l-4 border-purple-500">
+                                <span class="text-2xl font-bold text-purple-600 mr-4">5.</span>
+                                <div>
+                                    <strong class="text-lg font-semibold text-gray-900">預覽與發佈</strong>
+                                    <p class="text-gray-700 mt-1">
+                                        點擊右上角**「眼睛 👁️ 圖示」**預覽問卷外觀。
+                                        確認無誤後，點擊**「傳送」按鈕**，取得連結或透過 E-mail 發送問卷。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 完整製作流程步驟 結束 -->
+
+                </section>
+
+                <!-- Panel 2: Setup (Slides 4 & 8) -->
+                <section id="panel-setup" class="content-panel hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">基本設定與美化</h2>
+                    <p class="mb-6 text-gray-700">一份專業的問卷從清晰的標題和引人注目的外觀開始。您可以自訂問卷的標題、說明以及視覺主題。</p>
+
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">1. 命名與描述</h3>
+                    <ul class="list-disc list-inside space-y-2 mb-6 text-gray-700">
+                        <li><strong>標題：</strong> 點擊左上角「未命名表單」輸入標題（例如：2025 年新產品意向調查）。</li>
+                        <li><strong>說明：</strong> 在「表單說明」區塊提供簡介、目的、預估填答時間或截止日期，幫助填答者了解背景。</li>
+                        <li><strong>基本資訊：</strong> 通常會先在問卷開頭設置問題，詢問受訪者的基本資料（例如：姓名、電子郵件）。</li>
+                    </ul>
+
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">2. 美化與佈景主題</h3>
+                    <p class="mb-4 text-gray-700">點擊介面上方的「調色盤」圖示即可「自訂主題」。</p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center p-4 bg-gray-100 rounded-lg">
+                            <span class="text-3xl">🖼️</span>
+                            <p class="mt-2 font-medium">頁首</p>
+                            <p class="text-sm text-gray-600">上傳圖片作為頂部橫幅。</p>
+                        </div>
+                        <div class="text-center p-4 bg-gray-100 rounded-lg">
+                            <span class="text-3xl">🎨</span>
+                            <p class="mt-2 font-medium">主題顏色</p>
+                            <p class="text-sm text-gray-600">調整問卷的主色調。</p>
+                        </div>
+                        <div class="text-center p-4 bg-gray-100 rounded-lg">
+                            <span class="text-3xl">🖌️</span>
+                            <p class="mt-2 font-medium">背景顏色</p>
+                            <p class="text-sm text-gray-600">調整背景區域的顏色。</p>
+                        </div>
+                        <div class="text-center p-4 bg-gray-100 rounded-lg">
+                            <span class="text-3xl">Aa</span>
+                            <p class="mt-2 font-medium">字型樣式</p>
+                            <p class="text-sm text-gray-600">選擇不同的字體風格。</p>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-sm text-blue-700 bg-blue-50 p-3 rounded-lg"><strong>專業建議：</strong> 選擇與您的品牌或活動主題相符的顏色和圖片，能大幅增加專業感。</p>
+                </section>
+
+                <!-- Panel 3: Questions (Slides 5 & 6) -->
+                <section id="panel-questions" class="content-panel hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">問題類型詳解</h2>
+                    <p class="mb-6 text-gray-700">Google Forms 提供多樣化的問題類型以滿足不同情境。點擊右側工具列的 `+` 號即可新增問題。點擊下方卡片查看各類型說明。</p>
+
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <!-- 基礎問題 -->
+                        <div class="question-card bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                            <h4 class="font-semibold text-lg text-gray-800">簡答</h4>
+                            <p class="text-sm text-gray-600 mt-1">適用：姓名、電話、簡短文字回饋。<br>備註：可設定「回應驗證」(如：數字、Email 格式)。</p>
+                        </div>
+                        <div class="question-card bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                            <h4 class="font-semibold text-lg text-gray-800">段落</h4>
+                            <p class="text-sm text-gray-600 mt-1">適用：較長篇幅的意見或建議。</p>
+                        </div>
+                        <div class="question-card bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                            <h4 class="font-semibold text-lg text-gray-800">單選題</h4>
+                            <p class="text-sm text-gray-600 mt-1">適用：只有一個答案（例如：性別、滿意度等級）。</p>
+                        </div>
+                        <div class="question-card bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                            <h4 class="font-semibold text-lg text-gray-800">核取方塊</h4>
+                            <p class="text-sm text-gray-600 mt-1">適用：可選擇多個答案（例如：喜歡的顏色、興趣）。</p>
+                        </div>
+                        <div class="question-card bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                            <h4 class="font-semibold text-lg text-gray-800">下拉式選單</h4>
+                            <p class="text-sm text-gray-600 mt-1">適用：選項過多時使用，可節省版面空間。</p>
+                        </div>
+
+                        <!-- 進階問題 -->
+                        <div class="question-card bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                            <h4 class="font-semibold text-lg text-gray-800">線性刻度</h4>
+                            <p class="text-sm text-gray-600 mt-1">適用：滿意度或頻率評分（例如：1-5 分）。</p>
+                        </div>
+                        <div class="question-card bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                            <h4 class="font-semibold text-lg text-gray-800">方格 (單選/核取)</h4>
+                            <p class="text-sm text-gray-600 mt-1">適用：矩陣式問題，多項產品/服務評分。</p>
+                        </div>
+                        <div class="question-card bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                            <h4 class="font-semibold text-lg text-gray-800">日期 / 時間</h4>
+                            <p class="text-sm text-gray-600 mt-1">適用：活動報名、預約時使用。</p>
+                        </div>
+                        <div class="question-card bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                            <h4 class="font-semibold text-lg text-gray-800">檔案上傳</h4>
+                            <p class="text-sm text-gray-600 mt-1">適用：允許受訪者上傳圖片或文件。<br>備註：檔案會儲存至您的 Google Drive。</p>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-xl font-semibold text-gray-800 mt-8 mb-3">重要功能</h3>
+                    <div class="flex flex-wrap gap-4">
+                        <span class="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full font-medium">必填：開啟確保此題不被跳過</span>
+                        <span class="bg-gray-100 text-gray-800 px-4 py-2 rounded-full font-medium">複製：快速複製相似問題</span>
+                        <span class="bg-gray-100 text-gray-800 px-4 py-2 rounded-full font-medium">刪除：移除此問題</span>
+                    </div>
+                </section>
+
+                <!-- Panel 4: Advanced (Slides 7 & 9) -->
+                <section id="panel-advanced" class="content-panel hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">進階功能與設定</h2>
+                    <p class="mb-6 text-gray-700">善用邏輯跳轉和表單設定，能讓您的問卷更專業、更符合邏輯，並提升填答體驗。</p>
+
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">1. 邏輯與分頁設定</h3>
+                    <div class="space-y-4 mb-6">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-medium text-gray-900">新增區段 (分頁)</h4>
+                            <p class="text-gray-700">在工具列點擊「新增區段」圖示（兩個矩形）。這能將問卷分成不同主題，讓長問卷看起來更簡潔。</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-medium text-gray-900">根據答案前往區段 (邏輯跳轉)</h4>
+                            <p class="text-gray-700">在「單選題」或「下拉式選單」中，點擊 `⋮` 選擇「根據答案前往區段」。例如：選擇「是」的受訪者跳到 A 區段，選擇「否」的跳到 B 區段。</p>
+                        </div>
+                    </div>
+
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">2. 表單設定 (Settings)</h3>
+                    <p class="mb-4 text-gray-700">點擊上方的「設定」標籤，您可以控制問卷的回應方式：</p>
+                    <ul class="list-disc list-inside space-y-3 text-gray-700">
+                        <li><strong>限制只允許一次回應：</strong> 需登入 Google 帳號，適合用於正式調查或投票。</li>
+                        <li><strong>編輯權限：</strong> 允許受訪者在送出後修改答案，適合用於預約或報名。</li>
+                        <li><strong>查看摘要圖表：</strong> 允許受訪者查看所有回應的即時統計圖表。</li>
+                        <li><strong>顯示進度列：</strong> 讓填答者知道目前進度，適合用於較長的問卷。</li>
+                        <li><strong>自訂確認訊息：</strong> 填寫完成後顯示的感謝詞或下一步指引（例如：提供官網連結）。</li>
+                    </ul>
+                </section>
+
+                <!-- Panel 5: Analysis (Slides 10 & 11) -->
+                <section id="panel-analysis" class="content-panel hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">發佈與分析回應</h2>
+                    <p class="mb-6 text-gray-700">完成問卷設計後，您可以輕鬆地分享給受訪者，並即時查看分析結果。</p>
+
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">1. 發佈與分享問卷</h3>
+                    <p class="mb-4 text-gray-700">點擊右上角「傳送」按鈕，您可以選擇：</p>
+                    <div class="grid md:grid-cols-3 gap-4 mb-8">
+                        <div class="bg-blue-50 p-4 rounded-lg text-center">
+                            <h4 class="font-medium text-blue-800">電子郵件</h4>
+                            <p class="text-sm text-gray-700">直接輸入 E-mail 傳送。</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg text-center">
+                            <h4 class="font-medium text-blue-800">連結</h4>
+                            <p class="text-sm text-gray-700">取得短網址，貼到社群媒體或聊天室。</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg text-center">
+                            <h4 class="font-medium text-blue-800">嵌入 HTML</h4>
+                            <p class="text-sm text-gray-700">將問卷嵌入您的網站或網誌中。</p>
+                        </div>
+                    </div>
+
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">2. 檢視與分析回應</h3>
+                    <p class="mb-4 text-gray-700">在問卷編輯頁面點擊「回覆」標籤，您會看到：</p>
+                    
+                    <div class="grid md:grid-cols-2 gap-6 mb-4">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-medium text-gray-900">摘要 (自動圖表)</h4>
+                            <p class="text-gray-700 mb-4">Google Forms 會自動生成統計圖表（如長條圖、圓餅圖），讓您快速掌握整體趨勢。</p>
+                            <!-- Fake Chart Mockup -->
+                            <div class="chart-container overflow-hidden">
+                                <h5 class="text-center font-medium text-sm text-gray-600 mb-2">您最喜歡的顏色？</h5>
+                                <div class="flex items-end h-40 space-x-2">
+                                    <div class="fake-chart-bar flex-1 h-1/2" data-value="50" style="width: 50%;"></div>
+                                    <div class="fake-chart-bar flex-1 h-3/4" data-value="75" style="width: 75%;"></div>
+                                    <div class="fake-chart-bar flex-1 h-1/4" data-value="25" style="width: 25%;"></div>
+                                </div>
+                                <div class="flex justify-around text-xs mt-1">
+                                    <span>藍色</span>
+                                    <span>綠色</span>
+                                    <span>黃色</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-medium text-gray-900">個別檢視</h4>
+                            <p class="text-gray-700 mb-4">您可以逐一查看每位受訪者完整的填答內容。</p>
+
+                            <h4 class="font-medium text-gray-900 mt-6">連結到試算表</h4>
+                            <p class="text-gray-700">點擊綠色「試算表」圖示，所有回應會即時匯入 Google Sheets。這非常方便您進行進階的數據排序、篩選或公式計算。</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Panel 6: Summary (Slide 12) -->
+                <section id="panel-summary" class="content-panel hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">總結與重點</h2>
+                    <p class="mb-6 text-gray-700">恭喜您！您已經學會了 Google Forms 的核心功能。以下是本次教學的重點回顧：</p>
+
+                    <div class="space-y-4">
+                        <div class="p-5 bg-blue-50 rounded-lg shadow-sm border border-blue-200">
+                            <h3 class="font-semibold text-lg text-blue-800">🚀 簡單視覺化</h3>
+                            <p class="text-gray-700">Google Forms 讓問卷製作變得非常簡單，透過拖放和點選即可完成設計。</p>
+                        </div>
+                        <div class="p-5 bg-green-50 rounded-lg shadow-sm border border-green-200">
+                            <h3 class="font-semibold text-lg text-green-800">🔗 智慧邏輯</h3>
+                            <p class="text-gray-700">利用「根據答案前往區段」功能，可以讓您的問卷更具邏輯性，提升填答體驗。</p>
+                        </div>
+                        <div class="p-5 bg-yellow-50 rounded-lg shadow-sm border border-yellow-200">
+                            <h3 class="font-semibold text-lg text-yellow-800">📊 強大分析</h3>
+                            <p class="text-gray-700">善用「回覆」中的自動圖表，以及「連結到 Google Sheets」進行進階數據分析，能大幅提高您的工作效率。</p>
+                        </div>
+                    </div>
+
+                    <p class="mt-8 text-lg text-center text-gray-700 font-medium">現在，輪到您動手實作看看了！</p>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navButtons = document.querySelectorAll('.nav-button');
+            const contentPanels = document.querySelectorAll('.content-panel');
+
+            function showPanel(targetId) {
+                let panelFound = false;
+                contentPanels.forEach(panel => {
+                    if (panel.id === targetId) {
+                        panel.classList.remove('hidden');
+                        panelFound = true;
+                    } else {
+                        panel.classList.add('hidden');
+                    }
+                });
+
+                if (targetId === 'panel-analysis' && panelFound) {
+                    animateFakeCharts();
+                }
+
+                navButtons.forEach(button => {
+                    if (button.dataset.target === targetId) {
+                        button.classList.add('active');
+                    } else {
+                        button.classList.remove('active');
+                    }
+                });
+            }
+
+            function animateFakeCharts() {
+                const bars = document.querySelectorAll('.fake-chart-bar');
+                bars.forEach(bar => {
+                    bar.style.width = '0%';
+                    setTimeout(() => {
+                        bar.style.width = `${bar.dataset.value}%`;
+                    }, 100);
+                });
+            }
+
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    showPanel(button.dataset.target);
+                });
+            });
+
+            showPanel('panel-intro');
+        });
+    </script>
+</body>
+</html>
